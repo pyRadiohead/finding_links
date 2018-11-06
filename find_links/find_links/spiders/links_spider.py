@@ -1,6 +1,7 @@
 import scrapy
 f = open('website_list.txt', 'r')
 website_list = [i.strip() for i in f]
+no_need_links =['twitter','facebook','pinterest','mythemeshop','google','respond','mailto','#']
 
 
 
@@ -17,6 +18,13 @@ class LinksFinder(scrapy.Spider):
     #         'link3',
     #     ],
     # }
+    def link_filter(self,link_for_check):
+        for link in no_need_links:
+            if link in link_for_check:
+                print(link +' not in ' + link_for_check)
+                return False
+            return True
+
     def parse(self, response):
         self.current_website = response.url
         links = response.xpath('*//a/@href').extract()
@@ -28,10 +36,12 @@ class LinksFinder(scrapy.Spider):
 
     def parse_internal_links(self, response):
             links = response.xpath('*//a/@href').extract()
+            links = filter(self.link_filter,links)
             if links is not None:
                 for link in links:
-                    if link != self.current_website:
-                        print(link)
+                    for i in no_need_links:
+                        if not link.startswith(self.current_website):
+                            print(link)
             else:
                 pass
 
